@@ -1,3 +1,9 @@
+#ifdef _POSIX_C_SOURCE
+#undef _POSIX_C_SOURCE
+#endif
+
+#define _POSIX_C_SOURCE 200809L
+
 #include <stdio.h>
 #include <ctype.h>
 #include <inttypes.h>
@@ -123,9 +129,10 @@ void 	tui_signal(int);
 
 #if defined(TUI_ENGINE_IMPLEMENTATION)
 
-window_t *window = NULL;
-time_manager tm = { 0 };
-struct termios orig_termios;
+static window_t *window = NULL;
+static time_manager tm = { 0 };
+static struct termios orig_termios;
+static struct sigaction sigact ;
 
 buf_t buf_create(size_t capacity) {
 	return (buf_t) {
@@ -137,9 +144,18 @@ buf_t buf_create(size_t capacity) {
 
 void buf_str(buf_t *buf, const char *cstr) {
 	while ( *cstr ) {
-		if ( buf->size + 1 >= buf->capacity ) {
-			buf->capacity *= 2;	
-			buf->data = realloc(buf->data, buf->capacity);
+		if ( buf->size >= buf->capacity ) {
+
+			if ( buf->capacity == 0 ) {
+				buf->capacity = BUF_SIZE;					
+			} else {
+				buf->capacity *= 2;	
+			}
+
+			char *tmp = realloc(buf->data, buf->capacity);
+			if ( tmp == NULL ) return;
+
+			buf->data = tmp;
 		}
 
 		buf->data[buf->size++] = *cstr++;
@@ -216,7 +232,11 @@ void tui_init(void) {
 	tui_clear_backbuf();
 
 	timespec_get(&tm.last, TIME_MONOTONIC);
-	signal(SIGWINCH, tui_signal);
+
+	sigact.sa_handler = tui_signal;
+	sigemptyset(&sigact.sa_mask);
+	sigact.sa_flags = 0;
+	sigaction(SIGWINCH, &sigact, (struct sigaction *)NULL);
 
 	/*----- ENTER RAW MODE -----*/
 	tcgetattr(STDIN_FILENO, &orig_termios);
@@ -234,6 +254,8 @@ void tui_init(void) {
 
 void tui_exit(void) {
 	/*----- EXIT RAW MODE -----*/
+	sigemptyset(&sigact.sa_mask);
+
 	tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig_termios);
 
 	printf("\x1b[?25h");
@@ -416,7 +438,6 @@ float tui_dt(void)        { return tm.dt;      }
 
 void tui_signal(int sig) {
 	if ( SIGWINCH == sig ) {
-		(void)sig;
 		window->resized = 1;
 	}
 }
