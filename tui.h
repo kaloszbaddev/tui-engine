@@ -123,9 +123,9 @@ void 	tui_signal(int);
 
 #if defined(TUI_ENGINE_IMPLEMENTATION)
 
-static window_t *window = NULL;
-static time_manager tm = { 0 };
-static struct termios orig_termios;
+window_t *window = NULL;
+time_manager tm = { 0 };
+struct termios orig_termios;
 
 buf_t buf_create(size_t capacity) {
 	return (buf_t) {
@@ -137,7 +137,7 @@ buf_t buf_create(size_t capacity) {
 
 void buf_str(buf_t *buf, const char *cstr) {
 	while ( *cstr ) {
-		if ( buf->size >= buf->capacity ) {
+		if ( buf->size + 1 >= buf->capacity ) {
 			buf->capacity *= 2;	
 			buf->data = realloc(buf->data, buf->capacity);
 		}
@@ -357,12 +357,18 @@ void tui_resize(void) {
 	window->height = size.y;
 
 	const int buf_size = sizeof(pixel_t) * window->width * window->height;
+	
+	free(window->front_buf);
+	free(window->back_buf);
 
-	window->front_buf = realloc(window->front_buf, buf_size);
-	window->back_buf = realloc(window->back_buf, buf_size);
+	window->front_buf = malloc(buf_size);
+	window->back_buf = malloc(buf_size);
 
 	tui_clear_frontbuf();
 	tui_clear_backbuf();
+
+	printf("\x1b[1;1H\x1b[2J"); 
+    fflush(stdout);
 	
 	window->resized = 0;
 }
