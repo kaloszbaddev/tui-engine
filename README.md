@@ -1,4 +1,4 @@
-# tui-engine
+ # tui-engine
 
 tui-engine is a small library that allows you to draw in the terminal.
 
@@ -20,6 +20,8 @@ $ make
 int main(int argc, char **argv) {
     tui_init();
 
+	tui_foreground(TUI_AQUA);
+
     for ( ;; ) {
         tui_update();
 
@@ -31,7 +33,6 @@ int main(int argc, char **argv) {
             .cstr = "Hello World"
         };
 
-		tui_foreground(TUI_AQUA);
         tui_text(text);
         tui_draw();
 
