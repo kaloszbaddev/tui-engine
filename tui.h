@@ -1,3 +1,6 @@
+#ifndef TUI_ENGINE_H_
+#define TUI_ENGINE_H_
+
 #ifdef _POSIX_C_SOURCE
 #undef _POSIX_C_SOURCE
 #endif
@@ -346,15 +349,11 @@ void tui_draw(void) {
 }
 
 void tui_foreground(const rgb_t fg_color) {
-
 	foreground_color = PACK_RGB(fg_color.r, fg_color.g, fg_color.b);
-	
 }
 
 void tui_background(const rgb_t bg_color) {
-
 	background_color = PACK_RGB(bg_color.r, bg_color.g, bg_color.b);
-	
 }
 
 void tui_rectangle(const rectangle_t rec) {
@@ -476,5 +475,7 @@ void tui_signal(int sig) {
 		window->resized = 1;
 	}
 }
+
+#endif
 
 #endif
