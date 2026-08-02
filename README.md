@@ -28,10 +28,10 @@ int main(int argc, char **argv) {
 
         const text_t text = (text_t) {
             .pos = (vec2i_t) { 0, 0 },
-            .color = TUI_BLUE,
             .cstr = "Hello World"
         };
 
+		tui_foreground(TUI_AQUA);
         tui_text(text);
         tui_draw();
 
