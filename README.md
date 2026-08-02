@@ -19,7 +19,6 @@ $ make
 
 int main(int argc, char **argv) {
     tui_init();
-
 	tui_foreground(TUI_AQUA);
 
     for ( ;; ) {
@@ -36,7 +35,7 @@ int main(int argc, char **argv) {
         tui_text(text);
         tui_draw();
 
-        usleep(1000.);
+        usleep(1000);
     }
 
     tui_exit();
