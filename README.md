@@ -18,6 +18,7 @@ $ make
 #include "tui.h"
 
 int main(int argc, char **argv) {
+
     tui_init();
 	tui_foreground(TUI_AQUA);
 

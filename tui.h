@@ -311,7 +311,7 @@ void tui_draw(void) {
 					} else {
 						const rgb_t rgb = UNPACK_RGB(back_pixel.bg_color);	
 
-						snprintf(to_write, BUF_SIZE - 1, 
+						snprintf(to_write, BUF_SIZE, 
 							"\x1b[48;2;%d;%d;%dm", rgb.r, rgb.g, rgb.b);
 						buf_str(&buf, to_write);
 					}
@@ -326,7 +326,7 @@ void tui_draw(void) {
 					} else {
 						const rgb_t rgb = UNPACK_RGB(back_pixel.fg_color);	
 
-						snprintf(to_write, BUF_SIZE - 1, 
+						snprintf(to_write, BUF_SIZE, 
 							"\x1b[38;2;%d;%d;%dm", rgb.r, rgb.g, rgb.b);
 						buf_str(&buf, to_write);
 					}
@@ -334,7 +334,7 @@ void tui_draw(void) {
 					term_fg = back_pixel.fg_color;
 				}
 
-				snprintf(to_write, BUF_SIZE - 1, 
+				snprintf(to_write, BUF_SIZE, 
 						"\x1b[%d;%dH%c", y + 1, x + 1, back_pixel.c);	
 				buf_str(&buf, to_write);
 			}
