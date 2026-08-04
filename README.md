@@ -40,6 +40,7 @@ int main(int argc, char **argv) {
     }
 
     tui_exit();
+
     return 0;
 }
 ```

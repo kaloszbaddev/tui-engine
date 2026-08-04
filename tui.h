@@ -108,7 +108,10 @@ typedef enum {
 	TUI_UP = 1111,
 	TUI_DOWN, 
 	TUI_RIGHT, 
-	TUI_LEFT
+	TUI_LEFT,
+	TUI_ENTER,	
+	TUI_SPACE,
+	TUI_BACKSPACE
 } key_e;
 
 buf_t buf_create(size_t);
@@ -464,6 +467,12 @@ int tui_key(void) {
 		}
 	}
 
+	switch ( c ) {
+		case 13:  c = TUI_ENTER; 	 break;
+		case 32:  c = TUI_SPACE; 	 break;
+		case 127: c = TUI_BACKSPACE; break;
+	}
+
 	return c;
 }
 
@@ -476,6 +485,6 @@ void tui_signal(int sig) {
 	}
 }
 
-#endif
+#endif // TUI_ENGINE_IMPLEMENTATION
 
 #endif
