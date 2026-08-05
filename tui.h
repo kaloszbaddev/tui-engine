@@ -111,9 +111,10 @@ typedef enum {
 	TUI_DOWN, 
 	TUI_RIGHT, 
 	TUI_LEFT,
-	TUI_ENTER,	
-	TUI_SPACE,
-	TUI_BACKSPACE
+
+	TUI_ENTER = 13,	
+	TUI_SPACE = 32,
+	TUI_BACKSPACE = 127
 } key_e;
 
 buf_t buf_create(size_t);
@@ -456,12 +457,6 @@ int tui_key(void) {
 			case 'C': c = TUI_RIGHT; break;
 			case 'D': c = TUI_LEFT;  break;
 		}
-	}
-
-	switch ( c ) {
-		case 13:  c = TUI_ENTER; 	 break;
-		case 32:  c = TUI_SPACE; 	 break;
-		case 127: c = TUI_BACKSPACE; break;
 	}
 
 	return c;
