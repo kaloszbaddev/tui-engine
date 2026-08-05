@@ -20,7 +20,6 @@ $ make
 int main(int argc, char **argv) {
 
     tui_init();
-	tui_foreground(TUI_AQUA);
 
     for ( ;; ) {
         tui_update();
@@ -29,8 +28,9 @@ int main(int argc, char **argv) {
         if ( key == TUI_Q ) break;
 
         const text_t text = (text_t) {
-            .pos = (vec2i_t) { 0, 0 },
-            .cstr = "Hello World"
+            .cstr  = "Hello World",
+            .pos   = (vec2i_t) { 0, 0 },
+			.color = TUI_AQUA 
         };
 
         tui_text(text);

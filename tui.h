@@ -68,13 +68,15 @@ typedef struct {
 } window_t;
 
 typedef struct {
-	vec2i_t pos;
 	vec2i_t size;
+	vec2i_t pos;
+	rgb_t color;
 } rectangle_t;
 
 typedef struct {
-	vec2i_t pos;
 	const char *cstr;
+	vec2i_t pos;
+	rgb_t color;
 } text_t;
 
 typedef enum {
@@ -123,11 +125,9 @@ void 	tui_clear_frontbuf(void);
 void 	tui_init(void);
 void 	tui_exit(void);
 void 	tui_draw(void);
-void    tui_foreground(const rgb_t);
-void    tui_background(const rgb_t);
 void 	tui_rectangle(const rectangle_t);
 void 	tui_text(const text_t);
-void    tui_pixel(const vec2i_t, const char);
+void    tui_pixel(const int, const int, const char, const rgb_t);
 void 	tui_resize(void);
 void 	tui_update(void);
 int     tui_key(void);
@@ -141,9 +141,6 @@ static window_t *window = NULL;
 static time_manager tm = { 0 };
 static struct termios orig_termios;
 static struct sigaction sigact ;
-
-static int foreground_color = -1;
-static int background_color = -1;
 
 buf_t buf_create(size_t capacity) {
 	return (buf_t) {
@@ -228,9 +225,7 @@ void tui_init(void) {
 	/*----- INIT WINDOW -----*/
 	vec2i_t size = tui_termsize();
 
-	if ( size.x <= 0 || size.y <= 0 ) {
-		return;
-	}
+	if ( size.x <= 0 || size.y <= 0 ) return;
 
 	window = malloc(sizeof(window_t));
 
@@ -351,14 +346,6 @@ void tui_draw(void) {
 	memcpy(window->front_buf, window->back_buf, buf_size);
 }
 
-void tui_foreground(const rgb_t fg_color) {
-	foreground_color = PACK_RGB(fg_color.r, fg_color.g, fg_color.b);
-}
-
-void tui_background(const rgb_t bg_color) {
-	background_color = PACK_RGB(bg_color.r, bg_color.g, bg_color.b);
-}
-
 void tui_rectangle(const rectangle_t rec) {
 	int pos_x = rec.pos.x > 0 ? rec.pos.x : 0 ;	
 	int pos_y = rec.pos.y > 0 ? rec.pos.y : 0 ;
@@ -369,48 +356,52 @@ void tui_rectangle(const rectangle_t rec) {
 	for (int y = pos_y; y < end_y && y < window->height; ++y) {
 		for (int x = pos_x; x < end_x && x < window->width; ++x) {
 			pixel_t *pixel  = &window->back_buf[y * window->width + x];
-			pixel->bg_color = background_color;
+			pixel->bg_color = PACK_RGB(rec.color.r, rec.color.g, rec.color.g);
 			pixel->c = ' ';
 		}
 	}
 }
 
 void tui_text(const text_t text) {
+	int pos_x = text.pos.x > 0 ? text.pos.x : 0 ;
+	int pos_y = text.pos.y > 0 ? text.pos.y : 0 ;
+	
+	if ( pos_x >= window->width || pos_y >= window->height ) return;	
+
 	const char *cstr = text.cstr;
 
 	int n = strlen(cstr);
-
-	int pos_x = text.pos.x > 0 ? text.pos.x : 0 ;
-	int pos_y = text.pos.y > 0 ? text.pos.y : 0 ;
 
 	int end_x = pos_x + n;
 
 	for (int x = pos_x; x < end_x && x < window->width; ++x) {
 		pixel_t *pixel = &window->back_buf[pos_y * window->width + x];
-		pixel->fg_color = foreground_color;
+		pixel->fg_color = PACK_RGB(text.color.r, text.color.g, text.color.b);
 		pixel->c = *cstr++;
 	}
 }
 
-void tui_pixel(const vec2i_t pos, const char c) {
-	int pos_x = pos.x > 0 ? pos.x : 0 ;	
-	int pos_y = pos.y > 0 ? pos.y : 0 ;
+void tui_pixel(const int x, const int y, const char c, rgb_t color) {
+	int pos_x = x > 0 ? x : 0 ;	
+	int pos_y = y > 0 ? y : 0 ;
 
 	if ( pos_x >= window->width || pos_y >= window->height ) return;	
 
-	window->back_buf[pos_y * window->width + pos_x] = (pixel_t) {
-		.fg_color = foreground_color,
-		.bg_color = background_color,
-		.c = c
-	};
+	pixel_t *pixel = &window->back_buf[pos_y * window->width + pos_x];
+
+	if ( c == ' ' ) {
+		pixel->bg_color = PACK_RGB(color.r, color.g, color.b);
+	} else {
+		pixel->fg_color = PACK_RGB(color.r, color.g, color.b);	
+	}
+	
+	pixel->c = c;
 }
 
 void tui_resize(void) {
 	vec2i_t size = tui_termsize();
 
-	if ( size.x <= 0 || size.y <= 0 ) {
-		return;
-	}
+	if ( size.x <= 0 || size.y <= 0 ) return;
 
 	window->width = size.x;
 	window->height = size.y;
