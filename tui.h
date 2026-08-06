@@ -111,6 +111,7 @@ typedef enum {
 	TUI_DOWN, 
 	TUI_RIGHT, 
 	TUI_LEFT,
+	TUI_ESCAPE,
 
 	TUI_ENTER = 13,	
 	TUI_SPACE = 32,
@@ -447,18 +448,24 @@ int tui_key(void) {
 	read(STDIN_FILENO, &c, 1);
 	
 	c = toupper(c);
-	
-	if ( c == '[' ) {
+
+	if ( c == 27 ) {
 		read(STDIN_FILENO, &c, 1);
 
-		switch ( c ) {
-			case 'A': c = TUI_UP; 	 break;
-			case 'B': c = TUI_DOWN;  break;
-			case 'C': c = TUI_RIGHT; break;
-			case 'D': c = TUI_LEFT;  break;
-		}
-	}
+		if ( c == '[' ) {
+			read(STDIN_FILENO, &c, 1);
 
+			switch ( c ) {
+				case 'A': c = TUI_UP; 	 break;
+				case 'B': c = TUI_DOWN;  break;
+				case 'C': c = TUI_RIGHT; break;
+				case 'D': c = TUI_LEFT;  break;
+			}
+		} else {
+			c = TUI_ESCAPE;
+		} 
+	}
+	
 	return c;
 }
 
