@@ -23,7 +23,7 @@ int main(int argc, char **argv) {
     for ( ;; ) {
         tui_update();
 
-        key_t key = tui_key();
+        input_t key = tui_key();
         if ( key.value == TUI_Q ) break;
 
         const text_t text = (text_t) {

@@ -82,7 +82,7 @@ typedef struct {
 typedef struct {
 	int value; // you will rather use
 	int raw; // in a specific case
-} key_t;
+} input_t;
 
 typedef enum {
 	TUI_A = 'A', 
@@ -137,7 +137,7 @@ void 	tui_text(const text_t);
 void    tui_pixel(const int, const int, const char, const rgb_t);
 void 	tui_resize(void);
 void 	tui_update(void);
-key_t   tui_key(void);
+input_t tui_key(void);
 float 	tui_elapsed(void);
 float 	tui_dt(void);
 void 	tui_signal(int);
@@ -446,7 +446,7 @@ void tui_update(void) {
 	tm.last = now;
 }
 
-key_t tui_key(void) {
+input_t tui_key(void) {
 
 	int raw = 0 ;
 	read(STDIN_FILENO, &raw, 1);
@@ -470,7 +470,7 @@ key_t tui_key(void) {
 		} 
 	}
 	
-	return (key_t) {
+	return (input_t) {
 		.value = value,
 		.raw = raw
 	};
