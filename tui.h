@@ -79,6 +79,11 @@ typedef struct {
 	rgb_t color;
 } text_t;
 
+typedef struct {
+	int value; // you will rather use
+	int raw; // in a specific case
+} key_t;
+
 typedef enum {
 	TUI_A = 'A', 
 	TUI_B,	
@@ -118,7 +123,7 @@ typedef enum {
 	TUI_BACKSPACE = 127
 } key_e;
 
-buf_t buf_create(size_t);
+buf_t buf_create(const size_t);
 void  buf_str(buf_t *, const char *);
 
 vec2i_t tui_termsize(void);
@@ -132,10 +137,11 @@ void 	tui_text(const text_t);
 void    tui_pixel(const int, const int, const char, const rgb_t);
 void 	tui_resize(void);
 void 	tui_update(void);
-int     tui_key(void);
+key_t   tui_key(void);
 float 	tui_elapsed(void);
 float 	tui_dt(void);
 void 	tui_signal(int);
+void    tui_mssleep(const long);
 
 #if defined(TUI_ENGINE_IMPLEMENTATION)
 
@@ -224,7 +230,6 @@ void tui_init(void) {
 	
 	fflush(stdout);
 
-	/*----- INIT WINDOW -----*/
 	vec2i_t size = tui_termsize();
 
 	if ( size.x <= 0 || size.y <= 0 ) return;
@@ -251,7 +256,6 @@ void tui_init(void) {
 	sigact.sa_flags = 0;
 	sigaction(SIGWINCH, &sigact, (struct sigaction *)NULL);
 
-	/*----- ENTER RAW MODE -----*/
 	tcgetattr(STDIN_FILENO, &orig_termios);
 
 	struct termios raw = orig_termios;
@@ -266,7 +270,6 @@ void tui_init(void) {
 }
 
 void tui_exit(void) {
-	/*----- EXIT RAW MODE -----*/
 	sigemptyset(&sigact.sa_mask);
 
 	tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig_termios);
@@ -443,30 +446,34 @@ void tui_update(void) {
 	tm.last = now;
 }
 
-int tui_key(void) {
-	int c = 0 ;
-	read(STDIN_FILENO, &c, 1);
+key_t tui_key(void) {
+
+	int raw = 0 ;
+	read(STDIN_FILENO, &raw, 1);
 	
-	c = toupper(c);
+	int value = toupper(raw);
 
-	if ( c == 27 ) {
-		read(STDIN_FILENO, &c, 1);
+	if ( value == 27 ) {
+		read(STDIN_FILENO, &value, 1);
 
-		if ( c == '[' ) {
-			read(STDIN_FILENO, &c, 1);
+		if ( value == '[' ) {
+			read(STDIN_FILENO, &value, 1);
 
-			switch ( c ) {
-				case 'A': c = TUI_UP; 	 break;
-				case 'B': c = TUI_DOWN;  break;
-				case 'C': c = TUI_RIGHT; break;
-				case 'D': c = TUI_LEFT;  break;
+			switch ( value ) {
+				case 'A': value = TUI_UP; 	 break;
+				case 'B': value = TUI_DOWN;  break;
+				case 'C': value = TUI_RIGHT; break;
+				case 'D': value = TUI_LEFT;  break;
 			}
 		} else {
-			c = TUI_ESCAPE;
+			value = TUI_ESCAPE;
 		} 
 	}
 	
-	return c;
+	return (key_t) {
+		.value = value,
+		.raw = raw
+	};
 }
 
 float tui_elapsed(void)   { return tm.elapsed; } 
@@ -476,6 +483,15 @@ void tui_signal(int sig) {
 	if ( SIGWINCH == sig ) {
 		window->resized = 1;
 	}
+}
+
+void tui_mssleep(const long ms) {
+	struct timespec t1, t2;	
+
+	t1.tv_sec  = (int)ms / 1000;
+	t1.tv_nsec = (ms % 1000) * 1e6;
+
+	nanosleep(&t1, &t2);	
 }
 
 #endif // TUI_ENGINE_IMPLEMENTATION

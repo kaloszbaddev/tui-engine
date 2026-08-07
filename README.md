@@ -14,7 +14,6 @@ $ make
 
 ## Example
 ```c
-#include <unistd.h>
 #include "tui.h"
 
 int main(int argc, char **argv) {
@@ -24,8 +23,8 @@ int main(int argc, char **argv) {
     for ( ;; ) {
         tui_update();
 
-        int key = tui_key();
-        if ( key == TUI_Q ) break;
+        key_t key = tui_key();
+        if ( key.value == TUI_Q ) break;
 
         const text_t text = (text_t) {
             .cstr  = "Hello World",
@@ -36,7 +35,7 @@ int main(int argc, char **argv) {
         tui_text(text);
         tui_draw();
 
-        usleep(1000);
+		tui_mssleep(1000 / 60);
     }
 
     tui_exit();
