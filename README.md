@@ -23,8 +23,8 @@ int main(int argc, char **argv) {
     for ( ;; ) {
         tui_update();
 
-        input_t key = tui_key();
-        if ( key.value == TUI_Q ) break;
+        input_t input = tui_input();
+        if ( input.value == TUI_Q ) break;
 
         const text_t text = (text_t) {
             .cstr  = "Hello World",
@@ -35,7 +35,7 @@ int main(int argc, char **argv) {
         tui_text(text);
         tui_draw();
 
-		tui_mssleep(1000 / 60);
+		tui_sleepms(1000 / 60);
     }
 
     tui_exit();

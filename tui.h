@@ -137,11 +137,11 @@ void 	tui_text(const text_t);
 void    tui_pixel(const int, const int, const char, const rgb_t);
 void 	tui_resize(void);
 void 	tui_update(void);
-input_t tui_key(void);
+input_t tui_input(void);
 float 	tui_elapsed(void);
 float 	tui_dt(void);
 void 	tui_signal(int);
-void    tui_mssleep(const long);
+void    tui_sleepms(const long);
 
 #if defined(TUI_ENGINE_IMPLEMENTATION)
 
@@ -446,7 +446,7 @@ void tui_update(void) {
 	tm.last = now;
 }
 
-input_t tui_key(void) {
+input_t tui_input(void) {
 
 	int raw = 0 ;
 	read(STDIN_FILENO, &raw, 1);
@@ -485,7 +485,7 @@ void tui_signal(int sig) {
 	}
 }
 
-void tui_mssleep(const long ms) {
+void tui_sleepms(const long ms) {
 	struct timespec t1, t2;	
 
 	t1.tv_sec  = (int)ms / 1000;
