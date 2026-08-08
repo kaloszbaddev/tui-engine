@@ -361,7 +361,7 @@ void tui_rectangle(const rectangle_t rec) {
 	for (int y = pos_y; y < end_y && y < window->height; ++y) {
 		for (int x = pos_x; x < end_x && x < window->width; ++x) {
 			pixel_t *pixel  = &window->back_buf[y * window->width + x];
-			pixel->bg_color = PACK_RGB(rec.color.r, rec.color.g, rec.color.g);
+			pixel->bg_color = PACK_RGB(rec.color.r, rec.color.g, rec.color.b);
 			pixel->c = ' ';
 		}
 	}
